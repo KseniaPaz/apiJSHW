@@ -55,7 +55,6 @@ containerEl.innerHTML = activitiesHtml;
 
 
 const joinBtnElems = document.querySelectorAll('.join');
-//изначально все кнопки отмены неактивны
 const cancelBtnElems = document.querySelectorAll('.cancel');
 cancelBtnElems.forEach(element => element.disabled = true);
 
@@ -67,33 +66,26 @@ containerEl.addEventListener("click", function (e) {
     const currentMembersEl = parentEl.querySelector(".current-number");
     const currentMembers = activities[indexActivity].currentParticipants;
 
-    //если достигнуто максимально кол-во участников, кнопка записи неактивна
     const maxMembers = activities[indexActivity].maxParticipants;
     if (currentMembers === maxMembers) {
         joinBtnElems[indexActivity].disabled = true;
     }
 
     if (e.target.classList.contains("join")) {
-        //изменяем кол-во записанных участников в html
         currentMembersEl.textContent = currentMembers + 1;
 
-        //изменяем кол-во участников в массиве и записываем в localStorage
         activities[indexActivity].currentParticipants += 1;
         localStorage.setItem(localStorageKey, JSON.stringify(activities));
 
-        //делаем кнопку записи неактивной, если пользователь уже записался, а кнопку отмены - активной
         joinBtnElems[indexActivity].disabled = true;
         cancelBtnElems[indexActivity].disabled = false;
     }
     if (e.target.classList.contains("cancel")) {
-        //уменьшаем кол-во записанных участников в html
         currentMembersEl.textContent = currentMembers - 1;
 
-        //изменяем кол-во участников в массиве и записываем в localStorage
         activities[indexActivity].currentParticipants -= 1;
         localStorage.setItem(localStorageKey, JSON.stringify(activities));
 
-        //делаем кнопку записи неактивной, если пользователь уже записался, а кнопку отмены - активной
         joinBtnElems[indexActivity].disabled = false;
         cancelBtnElems[indexActivity].disabled = true;
     }
