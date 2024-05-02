@@ -1,103 +1,137 @@
-const activitiesJSON = `[
-    {
-        "id": 1,
-        "name": "Йога",
-        "time": "10:00 - 11:00",
-        "maxParticipants": 15,
-        "currentParticipants": 8
-    },
-    {
-        "id": 2,
-        "name": "Пилатес",
-        "time": "11:30 - 12:30",
-        "maxParticipants": 10,
-        "currentParticipants": 5
-    },
-    {
-        "id": 3,
-        "name": "Кроссфит",
-        "time": "13:00 - 14:00",
-        "maxParticipants": 20,
-        "currentParticipants": 15
-    },
-    {
-        "id": 4,
-        "name": "Танцы",
-        "time": "14:30 - 15:30",
-        "maxParticipants": 12,
-        "currentParticipants": 10
-    },
-    {
-        "id": 5,
-        "name": "Бокс",
-        "time": "16:00 - 17:00",
-        "maxParticipants": 8,
-        "currentParticipants": 6
-    }
-]`;
+"use strict";
 
-const localStorageKey = "activities";
-const data = localStorage.getItem(localStorageKey);
+const trainingInformation = [
+   {
+      "id": 1,
+      "name": "Йога",
+      "time": "10:00 - 11:00",
+      "maxParticipants": 15,
+      "currentParticipants": 8
+   },
+   {
+      "id": 2,
+      "name": "Пилатес",
+      "time": "11:30 - 12:30",
+      "maxParticipants": 10,
+      "currentParticipants": 5
+   },
+   {
+      "id": 3,
+      "name": "Кроссфит",
+      "time": "13:00 - 14:00",
+      "maxParticipants": 20,
+      "currentParticipants": 15
+   },
+   {
+      "id": 4,
+      "name": "Танцы",
+      "time": "14:30 - 15:30",
+      "maxParticipants": 12,
+      "currentParticipants": 10
+   },
+   {
+      "id": 5,
+      "name": "Бокс",
+      "time": "16:00 - 17:00",
+      "maxParticipants": 8,
+      "currentParticipants": 6
+   }
+]
 
-if (!data) {
-    localStorage.setItem(localStorageKey, activitiesJSON);
-}
+const localStorageKey = "signUpTraining";
+const section = document.querySelector('.section');
 
-const activities = JSON.parse(localStorage.getItem(localStorageKey));
+trainingInformation.forEach((element) => {
+   let disabledCancelRecording = "disabled";
+   let disabledSignUp = "";
+   const array = JSON.parse(localStorage.getItem(localStorageKey));
+   if (array != null) {
+      array.forEach((elem) => {
+         if (elem.id === element.id) {
+            element.currentParticipants += 1;
+            disabledCancelRecording = "";
+            disabledSignUp = "disabled";
+         }
+      });
+   };
 
-const activitiesHtml = activities
-    .map((activity) => getActivityHtml(activity))
-    .join("");
-
-const containerEl = document.querySelector(".container");
-
-containerEl.innerHTML = activitiesHtml;
-
-
-const joinBtnElems = document.querySelectorAll('.join');
-const cancelBtnElems = document.querySelectorAll('.cancel');
-cancelBtnElems.forEach(element => element.disabled = true);
-
-containerEl.addEventListener("click", function (e) {
-    const parentEl = e.target.closest(".activity");
-    const id = +parentEl.dataset.id;
-    const indexActivity = activities.findIndex((activity) => activity.id === id);
-
-    const currentMembersEl = parentEl.querySelector(".current-number");
-    const currentMembers = activities[indexActivity].currentParticipants;
-
-    const maxMembers = activities[indexActivity].maxParticipants;
-    if (currentMembers === maxMembers) {
-        joinBtnElems[indexActivity].disabled = true;
-    }
-
-    if (e.target.classList.contains("join")) {
-        currentMembersEl.textContent = currentMembers + 1;
-
-        activities[indexActivity].currentParticipants += 1;
-        localStorage.setItem(localStorageKey, JSON.stringify(activities));
-
-        joinBtnElems[indexActivity].disabled = true;
-        cancelBtnElems[indexActivity].disabled = false;
-    }
-    if (e.target.classList.contains("cancel")) {
-        currentMembersEl.textContent = currentMembers - 1;
-
-        activities[indexActivity].currentParticipants -= 1;
-        localStorage.setItem(localStorageKey, JSON.stringify(activities));
-
-        joinBtnElems[indexActivity].disabled = false;
-        cancelBtnElems[indexActivity].disabled = true;
-    }
+   section.insertAdjacentHTML("afterbegin",
+      itemRecords(element, disabledSignUp, disabledCancelRecording));
 });
 
-function getActivityHtml(activity) {
-    return `<div class="activity" data-id="${activity.id}">
-      <div class="name">${activity.name}</div>
-      <div class="time">${activity.time}</div>
-      <div class="max-members">Количество мест: <span class=""max-number>${activity.maxParticipants}</span></div>
-      <div class="current-members">Занято: <span class="current-number">${activity.currentParticipants}</span></div>
-      <button class="join">Записаться</button>
-      <button class="cancel">Отменить запись</button>
-  </div>`;
+function itemRecords (item, signUp, cancelRecording) {
+   return `
+      <div class="itemTraining">
+         <h3>Занятие: ${item.name}</h3>
+         <p>Время проведения: ${item.time}</p>
+         <p>Максимальное количество мест: ${item.maxParticipants}</p>
+         <p class="currentParticipants">Текущее количеставо участников: <span class="numbercurrentParticipants">${item.currentParticipants}</span></p>
+         <button ${signUp} onClick="signUp(this, ${item.id})" class="sign-up-button">Записаться</button>
+         <button ${cancelRecording} onClick="cancelRecording(this, ${item.id})" class="cancel-recording-button">Отменить запись</button>
+         <br>
+         <br>
+      </div>
+   `;
+}
+
+function signUp (item, id) {
+   const numbercurrentParticipants =
+      item.parentElement.getElementsByClassName("numbercurrentParticipants");
+
+   const cancelRecordingButton =
+      item.parentElement.getElementsByClassName("cancel-recording-button");
+
+   numbercurrentParticipants.item(0).textContent =
+      Number(numbercurrentParticipants.item(0).textContent) + 1;
+
+   cancelRecordingButton.item(0).disabled = false;
+
+   item.disabled = true;
+
+   saveLocalStorage(id);
+}
+
+function cancelRecording (item, id) {
+   const numbercurrentParticipants =
+      item.parentElement.getElementsByClassName("numbercurrentParticipants");
+
+   const signUpButton =
+      item.parentElement.getElementsByClassName("sign-up-button");
+
+   numbercurrentParticipants.item(0).textContent =
+      Number(numbercurrentParticipants.item(0).textContent) - 1;
+
+   signUpButton.item(0).disabled = false;
+
+   item.disabled = true;
+
+   removeLocalStorage(id);
+}
+
+function saveLocalStorage (id) {
+   let record = localStorage.getItem(localStorageKey);
+   if (record === null) {
+      record = JSON.stringify([{ id: id }]);
+   } else {
+      const arr = JSON.parse(record);
+      arr.push({ id: id });
+      record = JSON.stringify(arr);
+   }
+   localStorage.setItem(localStorageKey, record);
+}
+
+function removeLocalStorage (id) {
+   let arr;
+   let record = localStorage.getItem(localStorageKey);
+   if (record !== null) {
+      arr = JSON.parse(record);
+      const index = arr.indexOf(arr.find(it => it.id === id));
+      arr.splice(index, 1);
+      record = JSON.stringify(arr);
+   }
+   if (arr.length !== 0) {
+      localStorage.setItem(localStorageKey, record);
+   } else {
+      localStorage.removeItem(localStorageKey);
+   }
 }
